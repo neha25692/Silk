@@ -20,10 +20,10 @@ def fetch_hosts(client, identifier):
     return hosts
 
 def fetch():
-    print("Fetching CrowdStrike data...")
+    logging.info("Fetching CrowdStrike data...")
     crowdstrike_hosts = fetch_hosts(CrowdStrikeClient(), identifier="hostname")
 
-    print("Fetching Qualys data...")
+    logging.info("Fetching Qualys data...")
     qualys_hosts = fetch_hosts(QualysClient(), identifier="name")
 
     return crowdstrike_hosts, qualys_hosts
@@ -49,6 +49,7 @@ def deduplicate_data(crowdstrike_hosts, qualys_hosts):
         if hostname in qualys_hosts:
             qualys_hosts[hostname] = merge_host(host, qualys_hosts[hostname])
         else:
+            host['name'] = host['hostname']
             qualys_hosts[hostname] = host
     return qualys_hosts
 
@@ -56,8 +57,11 @@ def pipeline():
     crowdstrike_hosts, qualys_hosts = fetch()
     merged_hosts = deduplicate_data(crowdstrike_hosts, qualys_hosts)
     json.dump(merged_hosts, open('merged_hosts.json', 'w'))
+    logging.info("Merged hosts size: %d", len(merged_hosts))
+    logging.info("merged hosts written to: merged_hosts.json")
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     pipeline()
 
 if __name__ == "__main__":
