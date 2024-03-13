@@ -16,7 +16,7 @@ class SilkClient:
         headers = {'accept': 'application/json','token': self.token}
         response = requests.post(self.base_url+'?skip='+str(skip)+'&limit='+str(LIMIT), headers=headers)
         if response.status_code != http.HTTPStatus.OK:
-            raise Exception('crowdstrike request failed', response.status_code)
+            raise Exception(self.get_type(), 'request failed', response.status_code)
 
         host_list = json.loads(response.content)
         return host_list
